@@ -37,7 +37,7 @@ jobs:
           echo "SALT_ROUND=$SALT_ROUND" >> ./server/.env.production
           echo "ACCESS_KEY=$ACCESS_KEY" >> ./server/.env.production
           echo "SECRET_ACCESS_KEY=$SECRET_ACCESS_KEY" >> ./server/.env.production
-          echo "S3_BUCKET_REGION=$S3_BUCKET_REGION" >> ./server/.env.production
+          echo "AWS_REGION=$AWS_REGION" >> ./server/.env.production
           echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> ./server/.env.production
           echo "SERVER_PORT=$SERVER_PORT" >> ./server/.env.production
         env:
@@ -56,7 +56,7 @@ jobs:
           SALT_ROUND: ${{ secrets.SALT_ROUND }}
           ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
           SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
-          S3_BUCKET_REGION: ${{ secrets.S3_BUCKET_REGION }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
           S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
           SERVER_PORT: ${{ secrets.SERVER_PORT }}
 
@@ -86,7 +86,7 @@ jobs:
           # Build a docker container and
           # push it to ECR so that it can
           # be deployed to ECS.
-          docker build -t ${{ secrets.AWS_BASIC_URL }}/$ECR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG .
+          sudo docker build -t ${{ secrets.AWS_BASIC_URL }}/$ECR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG .
 
       - name: server image build
         working-directory: ./server
@@ -99,7 +99,7 @@ jobs:
           # Build a docker container and
           # push it to ECR so that it can
           # be deployed to ECS.
-          docker build -t ${{ secrets.AWS_BASIC_URL }}/$ECR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG .
+          sudo docker build -t ${{ secrets.AWS_BASIC_URL }}/$ECR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG .
 
       - name: ecr image push
         id: push-image
@@ -109,10 +109,10 @@ jobs:
           CLIENT_IMAGE_NAME: note-client
           SERVER_IMAGE_NAME: note-server
         run: |
-          docker push ${{ secrets.AWS_BASIC_URL }}/$ECR_REPOSITORY:$CLIENT_IMAGE_NAME
-          docker push ${{ secrets.AWS_BASIC_URL }}/$ECR_REPOSITORY:$SERVER_IMAGE_NAME
-          echo "image=${{ secrets.AWS_BASIC_URL }}/$ECR_REPOSITORY:$CLIENT_IMAGE_NAME" >> $GITHUB_OUTPUT
-          echo "image=${{ secrets.AWS_BASIC_URL }}/$ECR_REPOSITORY:$SERVER_IMAGE_NAME" >> $GITHUB_OUTPUT
+          sudo docker push ${{ secrets.AWS_BASIC_URL }}/$ECR_REPOSITORY:$CLIENT_IMAGE_NAME
+          sudo docker push ${{ secrets.AWS_BASIC_URL }}/$ECR_REPOSITORY:$SERVER_IMAGE_NAME
+          sudo echo "image=${{ secrets.AWS_BASIC_URL }}/$ECR_REPOSITORY:$CLIENT_IMAGE_NAME" >> $GITHUB_OUTPUT
+          sudo echo "image=${{ secrets.AWS_BASIC_URL }}/$ECR_REPOSITORY:$SERVER_IMAGE_NAME" >> $GITHUB_OUTPUT
 
       - name: EC2 Docker run
         uses: appleboy/ssh-action@master
@@ -121,4 +121,4 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            docker-compose -f ./docker-compose.yml up -d
+            sudo docker-compose -f ./docker-compose.yml up -d
