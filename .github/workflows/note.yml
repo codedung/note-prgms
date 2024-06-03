@@ -6,7 +6,8 @@ on:
 env:
   AWS_REGION: ap-northeast-2
   ECR_REPOSITORY: note-prgms
-  CONTAINER_NAME: MY_CONTAINER_NAME
+  CONTAINER_NAME: note-prgms
+  AWS_BASIC_URL: 794259226735.dkr.ecr.ap-northeast-2.amazonaws.com
 
 permissions:
   contents: read
@@ -86,7 +87,7 @@ jobs:
           # Build a docker container and
           # push it to ECR so that it can
           # be deployed to ECS.
-          sudo docker build -t ${{ secrets.AWS_BASIC_URL }}/$ECR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG .
+          sudo docker build -t $AWS_BASIC_URL/$ECR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG .
 
       - name: server image build
         working-directory: ./server
@@ -99,7 +100,7 @@ jobs:
           # Build a docker container and
           # push it to ECR so that it can
           # be deployed to ECS.
-          sudo docker build -t ${{ secrets.AWS_BASIC_URL }}/$ECR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG .
+          sudo docker build -t $AWS_BASIC_URL/$ECR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG .
 
       - name: ecr image push
         id: push-image
@@ -109,10 +110,10 @@ jobs:
           CLIENT_IMAGE_NAME: note-client
           SERVER_IMAGE_NAME: note-server
         run: |
-          sudo docker push ${{ secrets.AWS_BASIC_URL }}/$ECR_REPOSITORY:$CLIENT_IMAGE_NAME
-          sudo docker push ${{ secrets.AWS_BASIC_URL }}/$ECR_REPOSITORY:$SERVER_IMAGE_NAME
-          sudo echo "image=${{ secrets.AWS_BASIC_URL }}/$ECR_REPOSITORY:$CLIENT_IMAGE_NAME" >> $GITHUB_OUTPUT
-          sudo echo "image=${{ secrets.AWS_BASIC_URL }}/$ECR_REPOSITORY:$SERVER_IMAGE_NAME" >> $GITHUB_OUTPUT
+          sudo docker push $AWS_BASIC_URL/$ECR_REPOSITORY:$CLIENT_IMAGE_NAME
+          sudo docker push $AWS_BASIC_URL/$ECR_REPOSITORY:$SERVER_IMAGE_NAME
+          sudo echo "image=$AWS_BASIC_URL/$ECR_REPOSITORY:$CLIENT_IMAGE_NAME" >> $GITHUB_OUTPUT
+          sudo echo "image=$AWS_BASIC_URL/$ECR_REPOSITORY:$SERVER_IMAGE_NAME" >> $GITHUB_OUTPUT
 
       - name: EC2 Docker run
         uses: appleboy/ssh-action@master
