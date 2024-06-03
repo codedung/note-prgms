@@ -87,19 +87,21 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            aws ecr batch-get-image --repository-name note-prgms --image-ids imageTag=$CLIENT_IMAGE_NAME
-      - name: ECR image Server Check
-        id: server-check
-        uses: appleboy/ssh-action@master
-        env:
-          SERVER_IMAGE_NAME: note-server
-        with:
-          host: ${{ secrets.EC2_IP }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            aws ecr batch-get-image --repository-name note-prgms --image-ids imageTag=$SERVER_IMAGE_NAME
+            aws ecr batch-get-image --repository-name note-prgms --image-ids imageTag=note-client
+
+      # - name: ECR image Server Check
+      #   id: server-check
+      #   uses: appleboy/ssh-action@master
+      #   env:
+      #     SERVER_IMAGE_NAME: note-server
+      #   with:
+      #     host: ${{ secrets.EC2_IP }}
+      #     username: ${{ secrets.EC2_USERNAME }}
+      #     key: ${{ secrets.EC2_SSH_KEY }}
+      #     port: ${{ secrets.SSH_PORT }}
+      #     script: |
+      #       aws ecr batch-get-image --repository-name note-prgms --image-ids imageTag=$SERVER_IMAGE_NAME
+
       - name: ECR image Delete
         uses: appleboy/ssh-action@master
         with:
