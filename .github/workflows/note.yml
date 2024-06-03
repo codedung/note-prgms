@@ -78,6 +78,9 @@ jobs:
 
       - name: ECR image Delete
         uses: appleboy/ssh-action@master
+        env:
+          CLIENT_IMAGE_NAME: note-client
+          SERVER_IMAGE_NAME: note-server
         with:
           host: ${{ secrets.EC2_IP }}
           username: ${{ secrets.EC2_USERNAME }}
@@ -85,7 +88,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             whoami
-            aws ecr batch-delete-image --repository-name $ECR_REPOSITORY
+            aws ecr list-images --repository-name $ECR_REPOSITORY --image-ids imageTag=$CLIENT_IMAGE_NAME, imageTag=$SERVER_IMAGE_NAME
 
       - name: cilent image build and push
         working-directory: ./client
