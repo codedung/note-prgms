@@ -76,7 +76,7 @@ jobs:
 
       - name: cilent image build
         working-directory: ./client
-        id: build-image
+        id: client-build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
@@ -89,7 +89,7 @@ jobs:
         
       - name: server image build
         working-directory: ./server
-        id: build-image
+        id: server-build-image
         env:
           ECR_REGISTRY: ${{steps.login-ecr.outputs.registry}}
           IMAGE_TAG: ${{github.sha}}
