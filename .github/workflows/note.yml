@@ -75,6 +75,8 @@ jobs:
           host: ${{ secrets.EC2_IP }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+          sudo aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_BASIC_URL
 
       - name: cilent image build
         working-directory: ./client
