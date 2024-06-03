@@ -127,5 +127,5 @@ jobs:
         with:
           host: ${{secrets.EC2_IP}}
           username: ${{ secrets.EC2_USERNAME }}
-        script: |
-          docker-compose up -d
+          script: |
+            docker-compose up -d
