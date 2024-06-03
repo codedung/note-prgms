@@ -1,4 +1,4 @@
-name: note-be-CI
+name: note-CI
 on:
   push:
     branches: ["main"]
