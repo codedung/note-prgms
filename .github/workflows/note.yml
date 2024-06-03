@@ -85,8 +85,8 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
           IMAGE_NAME: note-client
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY/$IMAGE_NAME:1.0 .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY/$IMAGE_NAME:1.0
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_NAME .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_NAME
 
       - name: server image build and push
         working-directory: ./server
@@ -96,8 +96,8 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
           IMAGE_NAME: note-server
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY/$IMAGE_NAME:1.0 .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY/$IMAGE_NAME:1.0
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_NAME .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_NAME
 
       - name: EC2 Docker run
         uses: appleboy/ssh-action@master
