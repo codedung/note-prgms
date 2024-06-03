@@ -87,9 +87,11 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            if [[ aws ecr batch-get-image --repository-name note-prgms --image-ids imageTag=$CLIENT_IMAGE_NAME ]]; then
+            echo aws ecr batch-get-image --repository-name note-prgms --image-ids imageTag=$CLIENT_IMAGE_NAME >> $CLIENT_CHECK
+            echo aws ecr batch-get-image --repository-name note-prgms --image-ids imageTag=$SERVER_IMAGE_NAME >> $SERVER_CHECK
+            if [[ $CLIENT_CHECK ]]; then
               aws ecr batch-delete-image --repository-name note-prgms --image-ids imageTag=$CLIENT_IMAGE_NAME
-            if [[ aws ecr batch-get-image --repository-name note-prgms --image-ids imageTag=$SERVER_IMAGE_NAME ]]; then
+            if [[ $SERVER_CHECK ]]; then
               aws ecr batch-delete-image --repository-name note-prgms --image-ids imageTag=$SERVER_IMAGE_NAME
             fi
 
