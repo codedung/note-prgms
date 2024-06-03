@@ -70,6 +70,10 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
+        with:
+          host: ${{secrets.EC2_IP}}
+          username: ${{secrets.EC2_USERNAME}}
+          key: ${{ secrets.EC2_SSH_KEY }}
 
       - name: cilent image build
         working-directory: ./client
@@ -102,6 +106,7 @@ jobs:
         with:
           host: ${{ secrets.EC2_IP }}
           username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             aws ecr batch-delete-image \
             --repository-name $ECR_REPOSITORY \
@@ -125,5 +130,6 @@ jobs:
         with:
           host: ${{secrets.EC2_IP}}
           username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             docker-compose -f ./docker-compose.yml up -d
