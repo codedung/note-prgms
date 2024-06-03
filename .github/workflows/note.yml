@@ -92,7 +92,7 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{steps.login-ecr.outputs.registry}}
-          IMAGE_TAG:${{github.sha}}
+          IMAGE_TAG: ${{github.sha}}
           IMAGE_NAME: note-server
         run: |
           # Build a docker container and
