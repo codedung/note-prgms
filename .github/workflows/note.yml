@@ -101,17 +101,6 @@ jobs:
           # be deployed to ECS.
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG .
 
-      - name: ecr image delete
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_IP }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            aws ecr batch-delete-image \
-            --repository-name $ECR_REPOSITORY \
-            --image-ids imageTag=latest
-
       - name: ecr image push
         id: push-image
         env:
