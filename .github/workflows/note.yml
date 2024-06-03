@@ -24,8 +24,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Generate env
-        run: 
-          echo "DB_USER=$DB_USER" >> ./server/.env.production
+        run: echo "DB_USER=$DB_USER" >> ./server/.env.production
           echo "DB_PASSWORD=$DB_PASSWORD" >> ./server/.env.production
           echo "DB_ROOT_PASSWORD=$DB_ROOT_PASSWORD" >> ./server/.env.production
           echo "DB_DATABASE=$DB_DATABASE" >> ./server/.env.production
@@ -86,7 +85,7 @@ jobs:
           # push it to ECR so that it can
           # be deployed to ECS.
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG .
-        
+
       - name: server image build
         working-directory: ./server
         id: build-image
@@ -100,34 +99,33 @@ jobs:
           # be deployed to ECS.
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG .
 
-    - name: ecr image delete
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.EC2_IP }}
-        username: ${{ secrets.EC2_USERNAME }}
+      - name: ecr image delete
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_IP }}
+          username: ${{ secrets.EC2_USERNAME }}
+          script: |
+            aws ecr batch-delete-image \
+            --repository-name $ECR_REPOSITORY \
+            --image-ids imageTag=latest
+
+      - name: ecr image push
+        id: push-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+          CLIENT_IMAGE_NAME: note-client
+          SERVER_IMAGE_NAME: note-server
+        run: |
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$CLIENT_IMAGE_NAME
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$SERVER_IMAGE_NAME
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$CLIENT_IMAGE_NAME" >> $GITHUB_OUTPUT
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$SERVER_IMAGE_NAME" >> $GITHUB_OUTPUT
+
+      - name: EC2 run
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.EC2_IP}}
+          username: ${{ secrets.EC2_USERNAME }}
         script: |
-          aws ecr batch-delete-image \
-          --repository-name $ECR_REPOSITORY \
-          --image-ids imageTag=latest
-
-    - name: ecr image push
-      id: push-image
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_TAG: ${{ github.sha }}
-        CLIENT_IMAGE_NAME: note-client
-        SERVER_IMAGE_NAME: note-server
-      run: |
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$CLIENT_IMAGE_NAME
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$SERVER_IMAGE_NAME
-        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$CLIENT_IMAGE_NAME" >> $GITHUB_OUTPUT
-        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$SERVER_IMAGE_NAME" >> $GITHUB_OUTPUT
-
-    - name: EC2 run
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{secrets.EC2_IP}}
-        username: ${{ secrets.EC2_USERNAME }}
-      script: |
           docker-compose up -d
-
