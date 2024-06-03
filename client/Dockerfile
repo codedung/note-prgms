@@ -8,7 +8,7 @@ RUN npm install --silent
 
 COPY . .
 
-RUN rpm run build
+RUN npm run build
 
 EXPOSE 5173
 
