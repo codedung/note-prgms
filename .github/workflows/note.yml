@@ -60,7 +60,7 @@ jobs:
           SERVER_PORT: ${{ secrets.SERVER_PORT }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -105,9 +105,7 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            aws ecr batch-delete-image \
-            --repository-name $ECR_REPOSITORY \
-            --image-ids imageTag=note-client imageTag=note-server imageTag=db
+            aws ecr batch-delete-image --repository-name $ECR_REPOSITORY --image-ids imageTag=-
 
       - name: EC2 Docker run
         uses: appleboy/ssh-action@master
