@@ -87,7 +87,11 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            aws ecr batch-delete-image --repository-name note-prgms --image-ids imageTag=$SERVER_IMAGE_NAME imageTag=$CLIENT_IMAGE_NAME
+            if [[ aws ecr batch-get-image --repository-name note-prgms --image-ids imageTag=$CLIENT_IMAGE_NAME ]]; then
+              aws ecr batch-delete-image --repository-name note-prgms --image-ids imageTag=$CLIENT_IMAGE_NAME
+            if [[ aws ecr batch-get-image --repository-name note-prgms --image-ids imageTag=$SERVER_IMAGE_NAME ]]; then
+              aws ecr batch-delete-image --repository-name note-prgms --image-ids imageTag=$SERVER_IMAGE_NAME
+            fi
 
       - name: cilent image build and push
         working-directory: ./client
