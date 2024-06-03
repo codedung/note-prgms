@@ -3,15 +3,23 @@ version: "2.26"
 services:
   client:
     image: ${{secrets.AWS_BASIC_URL}}/${{secrets.REPOSITORY}}:note-client
+    container_name: note-client
     restart: always
     posrts:
       - "5173:5173"
+    networks:
+      - server
 
-  server:
+  api:
     image: ${{secrets.AWS_BASIC_URL}}/${{secrets.REPOSITORY}}:note-server
+    container_name: note-server
     restart: always
     ports:
       - "5000:5000"
+    depends_on:
+      - db
+    networks:
+      - server
 
   db:
     image: ${{secrets.AWS_BASIC_URL}}/${{secrets.REPOSITORY}}:db
@@ -25,6 +33,9 @@ services:
       MYSQL_ROOT_PASSWORD: ${{secrets.DB_ROOT_PASSWORD}}
       MYSQL_PASSWORD: ${{secrets.DB_PASSWORD}}
       MYSQL_DATABASE: ${{secrets.DB_DATABASE}}
+
+networks:
+  server:
 
 volumes:
   db_data: {}
