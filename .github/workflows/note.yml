@@ -88,6 +88,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             aws ecr batch-get-image --repository-name note-prgms --image-ids imageTag=note-client
+            echo "::set-output name=image::aws ecr batch-get-image --repository-name note-prgms --image-ids imageTag=note-client"
 
       # - name: ECR image Server Check
       #   id: server-check
@@ -110,7 +111,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            echo ${{ steps.client-check.images }}
+            echo ${{ steps.client-check.set-output }}
             echo ${{ steps.client-check.images[0].registryId }}
             if [[ ${{steps.client-check.imageDetails}} ]]; then
               aws ecr batch-delete-image --repository-name note-prgms --image-ids imageTag=$CLIENT_IMAGE_NAME
