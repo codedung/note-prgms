@@ -110,13 +110,13 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            - echo ${{ steps.client-check.images }}
-            - echo ${{ steps.client-check.images[0].registryId }}
-            - if [[ ${{steps.client-check.imageDetails}} ]]; then
+            echo ${{ steps.client-check.images }}
+            echo ${{ steps.client-check.images[0].registryId }}
+            if [[ ${{steps.client-check.imageDetails}} ]]; then
               aws ecr batch-delete-image --repository-name note-prgms --image-ids imageTag=$CLIENT_IMAGE_NAME
-            # - if [[ $SERVER_CHECK ]]; then
+            # if [[ $SERVER_CHECK ]]; then
             #   aws ecr batch-delete-image --repository-name note-prgms --image-ids imageTag=$SERVER_IMAGE_NAME
-            - fi
+            fi
 
       - name: cilent image build and push
         working-directory: ./client
