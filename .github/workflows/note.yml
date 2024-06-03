@@ -89,6 +89,7 @@ jobs:
           # push it to ECR so that it can
           # be deployed to ECS.
           sudo docker build -t $ECR_REGISTRY/$ECR_REPOSITORY/$IMAGE_NAME:1.0 .
+          sudo docker push $ECR_REGISTRY/$ECR_REPOSITORY/$IMAGE_NAME:1.0
 
       - name: server image build
         working-directory: ./server
@@ -102,26 +103,7 @@ jobs:
           # push it to ECR so that it can
           # be deployed to ECS.
           sudo docker build -t $ECR_REGISTRY/$ECR_REPOSITORY/$IMAGE_NAME:1.0 .
-
-      - name: ecr client image push
-        id: client-push-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
-          CLIENT_IMAGE_NAME: note-client
-        run: |
-          sudo docker push $ECR_REGISTRY/$ECR_REPOSITORY/$CLIENT_IMAGE_NAME:1.0
-          sudo echo "image=$ECR_REGISTRY/$ECR_REPOSITORY/$CLIENT_IMAGE_NAME:1.0" >> $GITHUB_OUTPUT
-
-      - name: ecr server image push
-        id: server-push-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
-          SERVER_IMAGE_NAME: note-server
-        run: |
-          sudo docker push $ECR_REGISTRY/$ECR_REPOSITORY/$SERVER_IMAGE_NAME:1.0
-          sudo echo "image=$ECR_REGISTRY/$ECR_REPOSITORY/$SERVER_IMAGE_NAME:1.0" >> $GITHUB_OUTPUT
+          sudo docker push $ECR_REGISTRY/$ECR_REPOSITORY/$IMAGE_NAME:1.0
 
       - name: EC2 Docker run
         uses: appleboy/ssh-action@master
