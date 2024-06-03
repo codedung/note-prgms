@@ -105,6 +105,7 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            whoami
             aws ecr batch-delete-image --repository-name $ECR_REPOSITORY --image-ids imageTag=-
 
       - name: EC2 Docker run
