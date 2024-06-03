@@ -106,7 +106,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             aws ecr batch-delete-image \
-            --repository-name 7days-be \
+            --repository-name $ECR_REPOSITORY \
             --image-ids imageTag=note-client imageTag=note-server imageTag=db
 
       - name: EC2 Docker run
