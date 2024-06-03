@@ -1,0 +1,133 @@
+name: note-be-CI
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+env:
+  AWS_REGION: ap-northeast-2
+  ECR_REPOSITORY: note-prgms
+  CONTAINER_NAME: MY_CONTAINER_NAME
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate env
+        run: 
+          echo "DB_USER=$DB_USER" >> ./server/.env.production
+          echo "DB_PASSWORD=$DB_PASSWORD" >> ./server/.env.production
+          echo "DB_ROOT_PASSWORD=$DB_ROOT_PASSWORD" >> ./server/.env.production
+          echo "DB_DATABASE=$DB_DATABASE" >> ./server/.env.production
+          echo "DB_HOST=$DB_HOST" >> ./server/.env.production
+          echo "DB_PORT=$DB_PORT" >> ./server/.env.production
+          echo "DB_LIMIT=$DB_LIMIT" >> ./server/.env.production
+          echo "CORS_ORIGIN=$CORS_ORIGIN" >> ./server/.env.production
+          echo "JWT_ACCESS_SECRET=$JWT_ACCESS_SECRET" >> ./server/.env.production
+          echo "JWT_ACCESS_EXPIRED_IN=$JWT_ACCESS_EXPIRED_IN" >> ./server/.env.production
+          echo "JWT_REFRESH_SECRET=$JWT_REFRESH_SECRET" >> ./server/.env.production
+          echo "JWT_REFRESH_EXPIRED_IN=$JWT_REFRESH_EXPIRED_IN" >> ./server/.env.production
+          echo "SALT_ROUND=$SALT_ROUND" >> ./server/.env.production
+          echo "ACCESS_KEY=$ACCESS_KEY" >> ./server/.env.production
+          echo "SECRET_ACCESS_KEY=$SECRET_ACCESS_KEY" >> ./server/.env.production
+          echo "S3_BUCKET_REGION=$S3_BUCKET_REGION" >> ./server/.env.production
+          echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> ./server/.env.production
+          echo "SERVER_PORT=$SERVER_PORT" >> ./server/.env.production
+        env:
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_ROOT_PASSWORD: ${{ secrets.DB_ROOT_PASSWORD }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_LIMIT: ${{ secrets.DB_LIMIT }}
+          CORS_ORIGIN: ${{ secrets.CORS_ORIGIN }}
+          JWT_ACCESS_SECRET: ${{ secrets.JWT_ACCESS_SECRET }}
+          JWT_ACCESS_EXPIRED_IN: ${{ secrets.JWT_ACCESS_EXPIRED_IN }}
+          JWT_REFRESH_SECRET: ${{ secrets.JWT_REFRESH_SECRET }}
+          JWT_REFRESH_EXPIRED_IN: ${{ secrets.JWT_REFRESH_EXPIRED_IN }}
+          SALT_ROUND: ${{ secrets.SALT_ROUND }}
+          ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
+          SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
+          S3_BUCKET_REGION: ${{ secrets.S3_BUCKET_REGION }}
+          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: cilent image build
+        working-directory: ./client
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_NAME: note-client
+        run: |
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG .
+        
+      - name: server image build
+        working-directory: ./server
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{steps.login-ecr.outputs.registry}}
+          IMAGE_TAG:${{github.sha}}
+          IMAGE_NAME: note-server
+        run: |
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG .
+
+    - name: ecr image delete
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_IP }}
+        username: ${{ secrets.EC2_USERNAME }}
+        script: |
+          aws ecr batch-delete-image \
+          --repository-name $ECR_REPOSITORY \
+          --image-ids imageTag=latest
+
+    - name: ecr image push
+      id: push-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+        CLIENT_IMAGE_NAME: note-client
+        SERVER_IMAGE_NAME: note-server
+      run: |
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$CLIENT_IMAGE_NAME
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$SERVER_IMAGE_NAME
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$CLIENT_IMAGE_NAME" >> $GITHUB_OUTPUT
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$SERVER_IMAGE_NAME" >> $GITHUB_OUTPUT
+
+    - name: EC2 run
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{secrets.EC2_IP}}
+        username: ${{ secrets.EC2_USERNAME }}
+      script: |
+          docker-compose up -d
+

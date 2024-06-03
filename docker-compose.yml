@@ -1,0 +1,30 @@
+version: "2.26"
+
+services:
+  client:
+    image:794259226735.dkr.ecr.ap-northeast-2.amazonaws.com/note-prgms:note-client
+    restart: always
+    posrts:
+      - "5173:5173"
+
+  server:
+    image: 794259226735.dkr.ecr.ap-northeast-2.amazonaws.com/note-prgms:note-server
+    restart: always
+    ports:
+      - "5000:5000"
+
+  db:
+    image: 794259226735.dkr.ecr.ap-northeast-2.amazonaws.com/note-prgms:db
+    restart: always
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3308:3306"
+    environment:
+      MYSQL_USER: ${{secrets.DB_USER}}
+      MYSQL_ROOT_PASSWORD: ${{secrets.DB_ROOT_PASSWORD}}
+      MYSQL_PASSWORD: ${{secrets.DB_PASSWORD}}
+      MYSQL_DATABASE: ${{secrets.DB_DATABASE}}
+
+volumes:
+  db_data: {}
