@@ -12,12 +12,6 @@ permissions:
   contents: read
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
   deploy:
     name: Deploy
     environment: production
