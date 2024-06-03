@@ -87,8 +87,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            whoami
-            aws ecr list-images --repository-name $ECR_REPOSITORY --image-ids imageTag=$CLIENT_IMAGE_NAME, imageTag=$SERVER_IMAGE_NAME
+            aws ecr batch-delete-image --repository-name note-prgms --image-ids imageTag=$SERVER_IMAGE_NAME imageTag=$CLIENT_IMAGE_NAME
 
       - name: cilent image build and push
         working-directory: ./client
