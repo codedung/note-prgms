@@ -122,10 +122,10 @@ jobs:
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$CLIENT_IMAGE_NAME" >> $GITHUB_OUTPUT
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$SERVER_IMAGE_NAME" >> $GITHUB_OUTPUT
 
-      - name: EC2 run
+      - name: EC2 Docker run
         uses: appleboy/ssh-action@master
         with:
           host: ${{secrets.EC2_IP}}
           username: ${{ secrets.EC2_USERNAME }}
-          script: |
-            docker-compose up -d
+        run: |
+          docker-compose up -d
