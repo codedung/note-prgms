@@ -2,19 +2,19 @@ version: "2.26"
 
 services:
   client:
-    image:794259226735.dkr.ecr.ap-northeast-2.amazonaws.com/note-prgms:note-client
+    image: ${{secrets.AWS_BASIC_URL}}/${{secrets.REPOSITORY}}:note-client
     restart: always
     posrts:
       - "5173:5173"
 
   server:
-    image: 794259226735.dkr.ecr.ap-northeast-2.amazonaws.com/note-prgms:note-server
+    image: ${{secrets.AWS_BASIC_URL}}/${{secrets.REPOSITORY}}:note-server
     restart: always
     ports:
       - "5000:5000"
 
   db:
-    image: 794259226735.dkr.ecr.ap-northeast-2.amazonaws.com/note-prgms:db
+    image: ${{secrets.AWS_BASIC_URL}}/${{secrets.REPOSITORY}}:db
     restart: always
     volumes:
       - db_data:/var/lib/mysql
