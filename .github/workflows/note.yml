@@ -86,7 +86,7 @@ jobs:
           # Build a docker container and
           # push it to ECR so that it can
           # be deployed to ECS.
-          docker build -t ${{AWS_BASIC_URL}}/$ECR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG .
+          docker build -t ${{secrets.AWS_BASIC_URL}}/$ECR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG .
 
       - name: server image build
         working-directory: ./server
@@ -99,7 +99,7 @@ jobs:
           # Build a docker container and
           # push it to ECR so that it can
           # be deployed to ECS.
-          docker build -t ${{AWS_BASIC_URL}}/$ECR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG .
+          docker build -t ${{secrets.AWS_BASIC_URL}}/$ECR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG .
 
       - name: ecr image push
         id: push-image
@@ -109,10 +109,10 @@ jobs:
           CLIENT_IMAGE_NAME: note-client
           SERVER_IMAGE_NAME: note-server
         run: |
-          docker push ${{AWS_BASIC_URL}}/$ECR_REPOSITORY:$CLIENT_IMAGE_NAME
-          docker push ${{AWS_BASIC_URL}}/$ECR_REPOSITORY:$SERVER_IMAGE_NAME
-          echo "image=${{AWS_BASIC_URL}}/$ECR_REPOSITORY:$CLIENT_IMAGE_NAME" >> $GITHUB_OUTPUT
-          echo "image=${{AWS_BASIC_URL}}/$ECR_REPOSITORY:$SERVER_IMAGE_NAME" >> $GITHUB_OUTPUT
+          docker push ${{secrets.AWS_BASIC_URL}}/$ECR_REPOSITORY:$CLIENT_IMAGE_NAME
+          docker push ${{secrets.AWS_BASIC_URL}}/$ECR_REPOSITORY:$SERVER_IMAGE_NAME
+          echo "image=${{secrets.AWS_BASIC_URL}}/$ECR_REPOSITORY:$CLIENT_IMAGE_NAME" >> $GITHUB_OUTPUT
+          echo "image=${{secrets.AWS_BASIC_URL}}/$ECR_REPOSITORY:$SERVER_IMAGE_NAME" >> $GITHUB_OUTPUT
 
       - name: EC2 Docker run
         uses: appleboy/ssh-action@master
