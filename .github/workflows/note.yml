@@ -98,6 +98,15 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_NAME .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_NAME
 
+      - name: EC2 login to ECR
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_IP }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            aws ecr get-login-password --region $AWS_REGION | sudo docker login --username AWS --password-stdin $ECR_REGISTRY
+
       - name: EC2 Docker run
         uses: appleboy/ssh-action@master
         with:
@@ -107,6 +116,4 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             docker pull $ECR_REGISTRY/$ECR_REPOSITORY
-            echo "pull check"
             docker-compose -f ./docker-compose.yml up -d
-            echo "container build"
