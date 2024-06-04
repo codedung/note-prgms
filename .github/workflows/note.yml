@@ -106,5 +106,5 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            docker-compose -f ./docker-compose.yml build
-            docker-compose up -d
+            docker pull $ECR_REGISTRY/$ECR_REPOSITORY
+            docker-compose docker-compose.yml up -d
