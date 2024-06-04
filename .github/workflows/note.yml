@@ -110,8 +110,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            echo ${{ steps.client-check.outputs }}
-            echo $CLIENT_CHECK
+            echo "${{ steps.client-check.outputs }}"
+            echo "$CLIENT_CHECK"
             echo ${{ steps.server-check.outputs }}
             if [[ ${{ steps.client-check.outputs }} -eq true ]]; then
               aws ecr batch-delete-image --repository-name note-prgms --image-ids imageTag=$CLIENT_IMAGE_NAME
