@@ -87,7 +87,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            echo "::set-output name=image::aws ecr batch-get-image --repository-name $ECR_REPOSITORY --image-ids imageTag=$CLIENT_IMAGE_NAME" >> $CLIENT_CHECK
+            echo "::set-output name=image::aws ecr batch-get-image --repository-name $ECR_REPOSITORY --image-ids imageTag=$CLIENT_IMAGE_NAME" << $CLIENT_CHECK
 
       - name: ECR image Server Check
         id: server-check
@@ -100,7 +100,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            echo "::set-output name=image::aws ecr batch-get-image --repository-name $ECR_REPOSITORY --image-ids imageTag=$SERVER_IMAGE_NAME" >> $SERVER_CHECK
+            echo "::set-output name=image::aws ecr batch-get-image --repository-name $ECR_REPOSITORY --image-ids imageTag=$SERVER_IMAGE_NAME" << $SERVER_CHECK
 
       - name: ECR image Delete
         uses: appleboy/ssh-action@master
