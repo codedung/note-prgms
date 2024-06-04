@@ -16,6 +16,9 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     environment: production
+    outputs:
+      check:
+        client: ${{ steps.client-check.outputs.image }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -75,50 +78,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             docker login -u AWS -p $(aws ecr get-login-password --region $AWS_REGION) $ECR_REGISTRY
-
-      - name: ECR image Client Check
-        id: client-check
-        uses: appleboy/ssh-action@master
-        env:
-          CLIENT_IMAGE_NAME: note-client
-        with:
-          host: ${{ secrets.EC2_IP }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            echo "::set-output name=image::aws ecr batch-get-image --repository-name $ECR_REPOSITORY --image-ids imageTag=$CLIENT_IMAGE_NAME" >> "$GITHUB_OUTPUT"
-
-      - name: ECR image Server Check
-        id: server-check
-        uses: appleboy/ssh-action@master
-        env:
-          SERVER_IMAGE_NAME: note-server
-        with:
-          host: ${{ secrets.EC2_IP }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            echo "::set-output name=image::aws ecr batch-get-image --repository-name $ECR_REPOSITORY --image-ids imageTag=$SERVER_IMAGE_NAME" >> "$GITHUB_OUTPUT"
-
-      - name: ECR image Delete
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_IP }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            echo ${{ steps.client-check.outputs }}
-            echo ${{ steps.client-check.outputs.image }}
-            echo ${{ steps.client-check.image }}
-            if [[ ${{ steps.client-check.outputs }} -eq true ]]; then
-              aws ecr batch-delete-image --repository-name note-prgms --image-ids imageTag=$CLIENT_IMAGE_NAME
-            fi
-            if [[ steps.server-check.outputs.image ]]; then
-              aws ecr batch-delete-image --repository-name note-prgms --image-ids imageTag=$SERVER_IMAGE_NAME
-            fi
 
       - name: cilent image build and push
         working-directory: ./client
